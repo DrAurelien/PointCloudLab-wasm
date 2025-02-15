@@ -1,0 +1,20 @@
+<html>
+    <script src="PointCloudLab.js"></script>
+    <script>
+        function test()
+        {
+            let cloud= new Module.PointCloud();
+            if(cloud.Size() > 0)
+            {
+                let point = cloud.GetPoint(0);
+                console.log("Cloud is Point : [" + point.x + "; "+ point.y + "; "+ point.z + "]");
+            }
+            else
+                console.log("Cloud is empty");
+        }
+    </script>
+
+    <body>
+    <div onclick="test()">Click here</div>
+    </body>
+</html>

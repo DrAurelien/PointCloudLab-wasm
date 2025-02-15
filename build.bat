@@ -1,0 +1,1 @@
+@em++ -Os -s WASM=1 -lembind -Wl,--no-entry --bind "PointCloud.cpp" -o "PointCloudLab.js"
