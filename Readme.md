@@ -41,12 +41,21 @@ Once configured, you can build the project using the following command line :
 cmake --build build\wasm
 ```
 
+# Install
+The installation step copies the files required to tun the app under a target folder (default : ./install).
+To install, run the cmake command
+```
+cmake install
+```
+
 # Run
 
-The application is just a simple HTML page runing local scripts and webassemblies. But you browser will not allow to load those files directly from you local storage (due cross domain compatibility contraints). Thus, you will need to run a HTTP server to serve this simple HTTP page :
+The application is just a simple HTML page runing local scripts and webassemblies. But you browser will not allow to load those files directly from you local storage (due cross domain compatibility contraints). Thus, you will need to run a HTTP server to serve this simple HTTP page.
+You can run this server either under the build or install directory.
+I suggest using the python HTTP server :
 ```
-cd <Path_To_PointCloudLab>
-python -m http.server
+cd install\wasm
+python -m http.server 8000
 ```
 
 Then, open the url in your browser.
