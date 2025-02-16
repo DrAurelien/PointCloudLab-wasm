@@ -1,0 +1,25 @@
+<html>
+    <script src="PointCloudLab.js"></script>
+    <script>
+        function loadcsv()
+        {
+            let fileInput = document.getElementById("filePath");
+            if(fileInput.files.length > 0)
+            {
+                let fileContents = ""+fileInput.files[0].text().then(
+                    function(text) {
+                        let cloud = Module.LoadCloudFromCsv(text);
+                        document.getElementById("output").innerHTML = "Cloud size = " + cloud.Size();
+                        }
+                    );
+            }
+            else
+                document.getElementById("output").innerHTML = "No file selected";
+        }
+    </script>
+
+    <body>
+        <input type="file" accept=".csv" id="filePath" onchange="loadcsv()">Pick a CSV point Cloud</input>
+        <div id="output">Click here</div>
+    </body>
+</html>

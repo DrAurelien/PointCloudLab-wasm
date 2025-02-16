@@ -45,7 +45,7 @@ cmake --build build\wasm
 The installation step copies the files required to tun the app under a target folder (default : ./install).
 To install, run the cmake command
 ```
-cmake install
+cmake --install build\wasm
 ```
 
 # Run
@@ -60,3 +60,7 @@ python -m http.server 8000
 
 Then, open the url in your browser.
 http://localhost:8000
+
+# Dev resources
+
+- [embind refence](https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html)
