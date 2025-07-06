@@ -1,5 +1,6 @@
 PointCloudLab.js
 PointCloudLab.wasm
 build
+dependencies
 install
 .vscode/*

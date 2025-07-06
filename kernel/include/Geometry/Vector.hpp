@@ -85,6 +85,26 @@ public:
         return true;
     }
 
+    Vector& operator=(const Vector& iOther)
+    {
+        for(Dimension_t index=0; index<Dim; index++)
+            (*this)[index] = iOther[index];
+        return *this;
+    }
+
+    Scalar_t LengthSquared() const
+    {
+        Scalar_t lengthSquared = 0;
+        for(Dimension_t index=0; index<Dim; index++)
+            lengthSquared += (*this)[index] * (*this)[index];
+        return lengthSquared;
+    }
+
+    Scalar_t Length() const
+    {
+        return sqrt(LengthSquared());;
+    }
+
 protected:
     std::array<Scalar_t, Dim> m_Coords;
 };
@@ -147,6 +167,12 @@ public:
 
     bool operator==(const Point& iOther) const {
         return Base::operator==(iOther);
+    }
+
+    Point& operator=(const Point& iOther)
+    {
+        Base::operator=(iOther);
+        return *this;
     }
 
     static Point FromValue(Scalar_t iValue) {
