@@ -40,7 +40,7 @@ TEST(BoundingBoxTests, BuildFromPointCloud)
     pointCloud.AddPoint({1., 1., 1.});
     pointCloud.AddPoint({2., 2., 2.});
 
-    BoundingBox3D bbox(pointCloud);
+    BoundingBox3D bbox = BoundingBox3D::Compute(Model::PointCloudView(pointCloud));
     EXPECT_TRUE(bbox.IsValid());
     EXPECT_EQ(bbox.m_Min, Point3D({0., 0., 0.}));
     EXPECT_EQ(bbox.m_Max, Point3D({2., 2., 2.}));

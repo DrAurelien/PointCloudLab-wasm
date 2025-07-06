@@ -1,4 +1,5 @@
 #include "Geometry/Vector.hpp"
+#include <tbb/tbb.h>
 
 template <typename Scalar_t, Dimension_t Dim>
 struct BoundingBox
@@ -15,10 +16,28 @@ struct BoundingBox
     BoundingBox(const BoundingBox& iOther) = default;
 
     template<typename PointsCollection>
-    BoundingBox(const PointsCollection& iPointsCollections)
+    /*requires(tbb::is_range_v<PointsCollection> && 
+             tbb::is_convertible_v<typename PointsCollection::value_type, Point>)*/
+    static BoundingBox Compute(const PointsCollection& iPointsCollections)
     {
-        for(const auto& point : iPointsCollections)
-            Add(point);
+        return tbb::parallel_reduce(
+            iPointsCollections, 
+            BoundingBox{},
+            [&](const PointsCollection& iSubRange, const BoundingBox& iInitial) -> BoundingBox
+            {
+                BoundingBox box(iInitial);
+                for (const Point& point : iSubRange)
+                {
+                    box.Add(point);
+                }
+                return box;
+            },
+            [&](const BoundingBox& box1, const BoundingBox& box2) -> BoundingBox
+            {
+                BoundingBox result(box1);
+                result.Add(box2);
+                return result;
+            });
     }
 
     void Add(const Point& iPoint)
@@ -94,6 +113,13 @@ struct BoundingBox
     {
         return IsValid();
     }
+
+    BoundingBox& operator=(const BoundingBox& iOther)
+    {
+        m_Min = iOther.m_Min;
+        m_Max = iOther.m_Max;
+        return *this;
+    };
 
     Point m_Min {Point::MaxValue()};
     Point m_Max {Point::MinValue()};
