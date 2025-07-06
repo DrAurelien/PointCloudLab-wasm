@@ -30,6 +30,10 @@
                 "UNIT_TESTS": {
                     "type": "BOOL",
                     "value": "ON"
+                },
+                "BUILD_RENDERING": {
+                    "type": "BOOL",
+                    "value": "OFF"
                 }
             }
         }

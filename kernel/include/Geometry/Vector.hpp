@@ -1,5 +1,7 @@
 #include <array>
 #include <initializer_list>
+#include <limits>
+#include <stdexcept>
 
 #pragma once
 
@@ -17,6 +19,13 @@ public:
     Vector(const Vector& iOther) = default;
     Vector(Vector&& iOther) = default;
     Vector(const std::array<Scalar_t, Dim>& iStorage) : m_Coords(iStorage) {}
+    Vector(std::initializer_list<Scalar_t> iValues) {
+        if(iValues.size() != Dim)
+            throw std::invalid_argument("Initializer list size does not match the dimension.");
+        auto it = iValues.begin();
+        for(Dimension_t index=0; index<Dim; index++)
+            m_Coords[index] = *it++;
+    }
 
     Vector& operator-=(const Vector& iOther) {
         for(Dimension_t index=0; index<Dim; index++)
@@ -69,6 +78,13 @@ public:
         return m_Coords[iIndex];
     }
 
+    bool operator==(const Vector& iOther) const {
+        for(Dimension_t index=0; index<Dim; index++)
+            if((*this)[index] != iOther[index])
+                return false;
+        return true;
+    }
+
 protected:
     std::array<Scalar_t, Dim> m_Coords;
 };
@@ -91,6 +107,7 @@ public:
     Point(const Point& iOther) : Base(iOther) {}
     Point(Point&& iOther) : Base(std::move(iOther)) {}
     Point(const std::array<Scalar_t, Dim>& iStorage) : Base(iStorage) {}
+    Point(std::initializer_list<Scalar_t> iValues) : Base(iValues) {}
 
     Point& operator-=(const Base& iOther) {
         return Base::operator-=(iOther);
@@ -126,6 +143,25 @@ public:
 
     Scalar_t operator[](Dimension_t iIndex) const {
         return Base::operator[](iIndex);
+    }
+
+    bool operator==(const Point& iOther) const {
+        return Base::operator==(iOther);
+    }
+
+    static Point FromValue(Scalar_t iValue) {
+        Point result;
+        for(Dimension_t index=0; index<Dim; index++)
+            result[index] = iValue;
+        return result;
+    }
+
+    static Point MaxValue() {
+        return FromValue(std::numeric_limits<Scalar_t>::max());
+    }
+
+    static Point MinValue() {
+        return FromValue(-std::numeric_limits<Scalar_t>::max());
     }
 };
 

@@ -18,7 +18,8 @@ FetchContent_MakeAvailable(googletest)
 # Add source files for the unit test executable
 file(GLOB
     TEST_SOURCES
-    CSVRead-test.cpp
+    IO/CSVRead-test.cpp
+    Geometry/BoundingBox-test.cpp
 )
 
 # Create the test executable

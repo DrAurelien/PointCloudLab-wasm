@@ -1,4 +1,4 @@
-#include "model/PointCloud.hpp"
+#include "Model/PointCloud.hpp"
 #include <istream>
 
 namespace IO
@@ -16,5 +16,5 @@ namespace IO
         size_t m_LineNumber;
     };
 
-    PointCloud LoadCloudFromCsv(std::wistream& iFilePath, const CsvOptions& iOptions = {});
+    Model::PointCloud LoadCloudFromCsv(std::wistream& iFilePath, const CsvOptions& iOptions = {});
 }

@@ -1,4 +1,4 @@
-#include "io/LoadPointCloud.hpp"
+#include "IO/LoadPointCloud.hpp"
 #include <string_view>
 #include <string>
 #include <vector>
@@ -7,6 +7,7 @@
 #include <cctype>
 #include <optional>
 #include <iostream>
+#include <cwctype>
 
 namespace IO
 {
@@ -15,7 +16,7 @@ namespace
     class CsvLine
     {
         public:
-            CsvLine(std::wstring&& iLine, char iSeparator, size_t iLineNum) :
+            CsvLine(std::wstring&& iLine, wchar_t iSeparator, size_t iLineNum) :
                 m_Line(std::move(iLine)), m_Separator(iSeparator), m_LineNum(iLineNum)
             {
                 ParseLine();
@@ -83,7 +84,7 @@ namespace
         CsvColum(const std::wstring_view& iName, size_t iIndex) : m_Name(iName), m_Index(iIndex)
         {
             std::wstring name(iName);
-            std::transform(name.begin(), name.end(), name.begin(), [](unsigned char c) { return std::tolower(c); });
+            std::transform(name.begin(), name.end(), name.begin(), [](wchar_t c) { return std::towlower(c); });
             if(name == L"x")
                 m_Type = CsvColumType::X;
             else if(name == L"y")
@@ -133,9 +134,9 @@ namespace
             CsvParser(std::wistream& iStream, const CsvOptions& iOptions) : m_Stream(iStream), m_Options(iOptions) {}
             ~CsvParser() = default;
 
-            PointCloud ReadPointCloud()
+            Model::PointCloud ReadPointCloud()
             {
-                PointCloud result;
+                Model::PointCloud result;
                 bool headerParsed = false;
                 std::wstring lineStr;
                 for(size_t lineNum = 0; std::getline(m_Stream, lineStr); ++lineNum)
@@ -226,7 +227,7 @@ namespace
     };
 }
 
-PointCloud LoadCloudFromCsv(std::wistream& iStream, const CsvOptions& iOptions)
+Model::PointCloud LoadCloudFromCsv(std::wistream& iStream, const CsvOptions& iOptions)
 {
     CsvParser parser(iStream, iOptions);
     return parser.ReadPointCloud();

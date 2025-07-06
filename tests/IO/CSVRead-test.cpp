@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <sstream>
-#include "io/LoadPointCloud.hpp" // Assuming this is where LoadCloudFromCsv is declared
+#include "IO/LoadPointCloud.hpp" // Assuming this is where LoadCloudFromCsv is declared
 
 using namespace IO;
 

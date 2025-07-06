@@ -1,20 +1,20 @@
 #include "common.hpp"
-#include "model/PointCloud.hpp"
-#include "io/LoadPointCloud.hpp"
+#include "Model/PointCloud.hpp"
+#include "IO/LoadPointCloud.hpp"
 #include <sstream>
 #include <codecvt>
 #include <iostream>
 
 
-namespace
+namespace Bindings
 {
   // Wrapper for PointCloud to be used in emscripten bindings, that makes point cloud copyable.
   class PointCloudRef
   {
     public:
-    using PointCloudPtr = std::shared_ptr<PointCloud>;
-    PointCloudRef() : m_PointCloud(std::make_shared<PointCloud>()) {}
-    PointCloudRef(PointCloud&& iCloud) : m_PointCloud(std::make_shared<PointCloud>(std::move(iCloud))) {}
+    using PointCloudPtr = std::shared_ptr<Model::PointCloud>;
+    PointCloudRef() : m_PointCloud(std::make_shared<Model::PointCloud>()) {}
+    PointCloudRef(Model::PointCloud&& iCloud) : m_PointCloud(std::make_shared<Model::PointCloud>(std::move(iCloud))) {}
     PointCloudRef(const PointCloudRef&) = default;
     ~PointCloudRef() = default;
     PointCloudRef(PointCloudPtr& iPointCloud) : m_PointCloud(iPointCloud) {}
@@ -27,16 +27,7 @@ namespace
 
   PointCloudRef LoadCloudFromCsv(const std::string& iFileContent)
   {
-    const bool isUTF8 = false; // Assuming the input is UTF-8 encoded.
-    std::wstring wFileContent;
-    if(isUTF8)
-    {
-      // Convert UTF-8 string to wide string using std::wstring_convert
-      std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-      wFileContent = converter.from_bytes(iFileContent);
-    }
-    else
-      wFileContent = std::wstring(iFileContent.begin(), iFileContent.end());
+    std::wstring wFileContent = std::wstring(iFileContent.begin(), iFileContent.end());
     std::wstringstream stream(wFileContent);
     try
     {
@@ -51,10 +42,10 @@ namespace
 }
 
 EMSCRIPTEN_BINDINGS(PointCloudLab) {
-  emscripten::class_<PointCloudRef>("PointCloud")
+  emscripten::class_<Bindings::PointCloudRef>("PointCloud")
     .constructor()
-    .function("Size", &PointCloudRef::Size)
-    .function("GetPoint", &PointCloudRef::GetPoint);
+    .function("Size", &Bindings::PointCloudRef::Size)
+    .function("GetPoint", &Bindings::PointCloudRef::GetPoint);
 
-    emscripten::function("LoadCloudFromCsv", &LoadCloudFromCsv);
+    emscripten::function("LoadCloudFromCsv", &Bindings::LoadCloudFromCsv);
 }
