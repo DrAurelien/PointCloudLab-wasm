@@ -24,9 +24,14 @@ PointCloud::PointCloud(const PointCloud& iOther) : m_Impl(std::move(iOther.m_Imp
 PointCloud::~PointCloud() = default;
 
 
-PointCloud::Size_t PointCloud::Size()
+PointCloud::Size_t PointCloud::Size() const
 {
     return static_cast<Size_t>(m_Impl->m_Points.size());
+}
+
+void PointCloud::Reserve(Size_t iSize)
+{
+    m_Impl->m_Points.reserve(iSize);
 }
 
 const Point3D& PointCloud::GetPoint(Index_t iIndex) const
@@ -53,55 +58,116 @@ PointCloud& PointCloud::operator=(PointCloud&& iOther)
     return *this;
 }
 
-PointCloudIterator PointCloud::begin() const
+//====================================================================
+struct PointCloudView::Impl
+{
+    std::shared_ptr<PointCloud::Impl> CloudImpl{nullptr}; // Shared pointer to the point cloud implementation.
+    PointCloud::Index_t From{0};
+    PointCloud::Index_t To{0}; // Range of indices in the point cloud that this view represents.
+    PointCloud::Size_t GrainSize{PointCloudView::DefaultGrainSize()}; // Size of the grain for parallel processing.
+};
+
+PointCloudView::PointCloudView(const PointCloud& iCloud, PointCloud::Size_t iGrainSize)
+:m_Impl(std::make_shared<Impl>())
+{
+    m_Impl->CloudImpl = iCloud.m_Impl;
+    m_Impl->From = 0;
+    m_Impl->To = static_cast<PointCloud::Index_t>(iCloud.Size());
+    m_Impl->GrainSize = iGrainSize;
+}
+
+PointCloudView::PointCloudView(const PointCloud& iCloud, PointCloud::Index_t iFrom, PointCloud::Index_t iTo, PointCloud::Size_t iGrainSize)
+:m_Impl(std::make_shared<Impl>())
+{
+    m_Impl->CloudImpl = iCloud.m_Impl;
+    m_Impl->From = iFrom;
+    m_Impl->To = iTo;
+    m_Impl->GrainSize = iGrainSize;
+}
+
+PointCloudView::PointCloudView(const PointCloudView& iOther)
+:m_Impl(std::make_shared<Impl>(*iOther.m_Impl))
+{   
+}
+
+PointCloudView::~PointCloudView() = default;
+
+bool PointCloudView::empty() const
+{
+    return m_Impl->From >= m_Impl->To;
+}
+
+bool PointCloudView::is_divisible() const
+{
+    return (m_Impl->To - m_Impl->From) > m_Impl->GrainSize;
+}
+
+PointCloudIterator PointCloudView::begin() const
 {
     return PointCloudIterator(*this);
 }
 
-PointCloudSentinel PointCloud::end() const
+PointCloudSentinel PointCloudView::end() const
 {
     return {};
+}
+
+size_t PointCloudView::size() const
+{
+    return static_cast<size_t>(m_Impl->To - m_Impl->From);
+}
+
+void PointCloudView::Split(PointCloudView& ioViewToSplit)
+{
+    m_Impl = std::make_shared<Impl>(*ioViewToSplit.m_Impl);
+    m_Impl->To += m_Impl->GrainSize;
+    ioViewToSplit.m_Impl->From = m_Impl->To;
+}
+
+PointCloud::Size_t PointCloudView::DefaultGrainSize()
+{
+    return 2048; // Default grain size for parallel processing.
 }
 
 //====================================================================
 struct PointCloudIterator::Impl
 {
-    std::shared_ptr<PointCloud::Impl> m_CloudImpl; // Shared pointer to the point cloud implementation.
-    std::vector<Point3D>::const_iterator m_Iterator; // Iterator for traversing the points in the cloud.
+    std::shared_ptr<PointCloudView::Impl> m_CloudViewImpl; // Shared pointer to the point cloud implementation.
+    PointCloud::Index_t m_CurrentIndex{0}; // Starting index of the iterator.
 };
 
-PointCloudIterator::PointCloudIterator(const PointCloud& cloud)
+PointCloudIterator::PointCloudIterator(const PointCloudView& iCloudView)
     : m_Impl(std::make_unique<Impl>())
 {
-    m_Impl->m_CloudImpl = cloud.m_Impl;
-    m_Impl->m_Iterator = m_Impl->m_CloudImpl->m_Points.cbegin();
+    m_Impl->m_CloudViewImpl = iCloudView.m_Impl;
+    m_Impl->m_CurrentIndex = m_Impl->m_CloudViewImpl->From;
 }
 
 PointCloudIterator::~PointCloudIterator() = default;
 
 PointCloudIterator::reference PointCloudIterator::operator*() const
 {
-    return *m_Impl->m_Iterator;
+    return m_Impl->m_CloudViewImpl->CloudImpl->m_Points[m_Impl->m_CurrentIndex];
 }
 
 PointCloudIterator::value_type PointCloudIterator::operator->() const
 {
-    return *m_Impl->m_Iterator;
+    return m_Impl->m_CloudViewImpl->CloudImpl->m_Points[m_Impl->m_CurrentIndex];
 }
 
 PointCloudIterator& PointCloudIterator::operator++()
 {
-    ++m_Impl->m_Iterator;
+    ++m_Impl->m_CurrentIndex;
     return *this;
 }
 
 bool PointCloudIterator::operator==(const PointCloudSentinel&) const
 {
-    return m_Impl->m_Iterator == m_Impl->m_CloudImpl->m_Points.cend();
+    return m_Impl->m_CurrentIndex >= m_Impl->m_CloudViewImpl->To;
 }
 
 bool PointCloudIterator::operator!=(const PointCloudSentinel&) const
 {
-    return m_Impl->m_Iterator != m_Impl->m_CloudImpl->m_Points.cend();
+    return m_Impl->m_CurrentIndex < m_Impl->m_CloudViewImpl->To;
 }
 }

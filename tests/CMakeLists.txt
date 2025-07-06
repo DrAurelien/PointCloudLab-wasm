@@ -35,5 +35,13 @@ target_link_libraries(PointCloudLabTests
     PointCloudLabKernel
 )
 
+
+add_custom_command(TARGET PointCloudLabTests
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:TBB::tbb> $<TARGET_FILE_DIR:PointCloudLabTests>
+    COMMENT "Copying TBB library $<TARGET_FILE:TBB::tbb> to the build directory $<TARGET_FILE_DIR:PointCloudLabTests>"
+    VERBATIM
+)
+
 # Add the test executable to CTest
 add_test(NAME PointCloudLabTests COMMAND PointCloudLabTests)

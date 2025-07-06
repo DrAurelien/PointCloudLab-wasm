@@ -1,0 +1,1 @@
+include(${TBB_INSTALL_DIR}/lib/cmake/TBBConfig.cmake)
