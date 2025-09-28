@@ -13,6 +13,7 @@ FetchContent_MakeAvailable(TBB)
 file(GLOB
     MODEL_SOURCES
     src/Model/PointCloud.cpp
+    src/Model/Octree.cpp
 )
 
 file(

@@ -121,6 +121,16 @@ struct BoundingBox
         return *this;
     };
 
+    bool Contains(const Point& iPoint) const
+    {
+        for (Dimension_t index = 0; index < Dim; ++index)
+        {
+            if (iPoint[index] < m_Min[index] || iPoint[index] > m_Max[index])
+                return false;
+        }
+        return true;
+    }
+
     Point m_Min {Point::MaxValue()};
     Point m_Max {Point::MinValue()};
 };

@@ -44,6 +44,13 @@ void PointCloud::AddPoint(const Point3D& iPoint)
     m_Impl->m_Points.push_back(iPoint);
 }
 
+PointCloud PointCloud::Clone()
+{
+    PointCloud clone;
+    clone.m_Impl = std::make_shared<Impl>();
+    clone.m_Impl->m_Points = m_Impl->m_Points; // Deep copy of points
+    return clone;
+}
 
 PointCloud& PointCloud::operator=(const PointCloud& iOther)
 { 
@@ -55,6 +62,12 @@ PointCloud& PointCloud::operator=(PointCloud&& iOther)
 {
     m_Impl = std::move(iOther.m_Impl);
     iOther.m_Impl = nullptr; // Ensure the moved-from object is in a valid state.
+    return *this;
+}
+
+PointCloud& PointCloud::operator+=(const PointCloud& iOther)
+{
+    m_Impl->m_Points.insert(m_Impl->m_Points.end(), iOther.m_Impl->m_Points.begin(), iOther.m_Impl->m_Points.end());
     return *this;
 }
 
@@ -120,7 +133,7 @@ size_t PointCloudView::size() const
 void PointCloudView::Split(PointCloudView& ioViewToSplit)
 {
     m_Impl = std::make_shared<Impl>(*ioViewToSplit.m_Impl);
-    m_Impl->To += m_Impl->GrainSize;
+    m_Impl->To = m_Impl->From + (m_Impl->To - m_Impl->From) / 2;
     ioViewToSplit.m_Impl->From = m_Impl->To;
 }
 

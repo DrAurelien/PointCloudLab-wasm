@@ -22,9 +22,11 @@ public:
     void Reserve(Size_t iSize);
     const Point3D& GetPoint(Index_t iIndex) const;
     void AddPoint(const Point3D& iPoint);
+    PointCloud Clone();
 
     PointCloud& operator=(const PointCloud& iOther);
     PointCloud& operator=(PointCloud&& iOther);
+    PointCloud& operator+=(const PointCloud& iOther);
 
 private:
     struct Impl;

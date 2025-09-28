@@ -20,6 +20,7 @@ file(GLOB
     TEST_SOURCES
     IO/CSVRead-test.cpp
     Geometry/BoundingBox-test.cpp
+    Model/Octree-test.cpp
 )
 
 # Create the test executable
